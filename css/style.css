@@ -1,0 +1,151 @@
+/* ==========================================================================
+   Song Link Converter: styles
+   Dark theme, mobile-first. All colors live in the :root variables below.
+   ========================================================================== */
+
+:root {
+  --bg: #0d1117;
+  --panel: #161b22;
+  --panel-2: #1c2330;
+  --border: #2a3340;
+  --text: #e6edf3;
+  --muted: #8b98a8;
+  --accent: #1db954;
+  --error: #ff7b72;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 640px; margin: 0 auto; padding: 28px 18px 60px; }
+
+/* ---------- Header ---------- */
+header { text-align: center; margin-bottom: 22px; }
+h1 { font-size: 22px; margin: 0 0 6px; }
+.sub { color: var(--muted); font-size: 14px; margin: 0; }
+h2 {
+  margin: 22px 0 10px;
+  font-size: 13px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .6px;
+  color: var(--muted);
+}
+
+/* ---------- Input ---------- */
+.input-row { display: flex; gap: 8px; }
+
+input[type="text"] {
+  flex: 1; min-width: 0;
+  padding: 14px;
+  font-size: 16px; /* 16px stops iOS from zooming in on focus */
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+}
+input[type="text"]:focus { border-color: var(--accent); }
+
+button.go {
+  padding: 0 20px;
+  font-size: 15px; font-weight: 700;
+  color: #04140a;
+  background: var(--accent);
+  border: none; border-radius: var(--radius);
+  cursor: pointer;
+}
+button.go:disabled { opacity: .55; }
+
+.paste {
+  display: block; width: 100%; margin-top: 8px; padding: 11px;
+  font-size: 14px; font-weight: 600;
+  color: var(--text);
+  background: var(--panel-2);
+  border: 1px solid var(--border); border-radius: var(--radius);
+  cursor: pointer;
+}
+
+/* ---------- Status message ---------- */
+.status { margin: 22px 0; text-align: center; font-size: 14px; color: var(--muted); }
+.status.err { color: var(--error); }
+
+/* ---------- Song card ---------- */
+.track {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 22px; padding: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.track img { width: 64px; height: 64px; flex-shrink: 0; border-radius: 8px; object-fit: cover; background: var(--panel-2); }
+.track .t { margin: 0 0 3px; font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+.track .a { margin: 0; font-size: 13px; color: var(--muted); }
+
+/* ---------- "Which one is it?" cover picker ---------- */
+.matches {
+  display: flex; gap: 10px;
+  padding-bottom: 8px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+}
+.matches::-webkit-scrollbar { height: 6px; }
+.matches::-webkit-scrollbar-track { background: transparent; }
+.matches::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+.match {
+  flex: 0 0 118px; padding: 8px;
+  font: inherit; text-align: left; color: var(--text);
+  background: var(--panel);
+  border: 2px solid var(--border); border-radius: 12px;
+  cursor: pointer;
+}
+.match.sel { border-color: var(--accent); }
+.match img { display: block; width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; background: var(--panel-2); }
+.match b { display: block; margin-top: 6px; font-size: 12.5px; line-height: 1.25; overflow-wrap: anywhere; }
+.match small { display: block; margin-top: 2px; font-size: 11.5px; line-height: 1.25; color: var(--muted); overflow-wrap: anywhere; }
+
+.note { margin: 6px 0 0; font-size: 12.5px; color: var(--muted); }
+
+/* ---------- Platform link rows ---------- */
+.plat {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 10px; padding: 12px 14px;
+  background: var(--panel);
+  border: 1px solid var(--border); border-radius: var(--radius);
+}
+.plat .ic {
+  display: grid; place-items: center; flex-shrink: 0;
+  width: 34px; height: 34px; border-radius: 8px;
+  font-size: 16px; font-weight: 800; color: #fff;
+}
+.plat .name { flex: 1; min-width: 0; }
+.plat .name b { display: block; font-size: 14.5px; }
+.plat .name small { display: block; margin-top: 1px; font-size: 11.5px; color: var(--muted); }
+
+.tag { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 5px; font-size: 10.5px; font-weight: 700; vertical-align: 1px; }
+.tag.exact  { background: rgba(29, 185, 84, .18);  color: var(--accent); }
+.tag.search { background: rgba(139, 152, 168, .18); color: var(--muted); }
+
+.btns { display: flex; gap: 7px; flex-shrink: 0; }
+.btns a, .btns button {
+  padding: 8px 12px;
+  font-family: inherit; font-size: 13px; font-weight: 600;
+  color: var(--text); text-decoration: none;
+  background: var(--panel-2);
+  border: 1px solid var(--border); border-radius: 9px;
+  cursor: pointer;
+}
+.btns button.done { background: var(--accent); color: #04140a; border-color: var(--accent); }
+
+/* ---------- Footer ---------- */
+footer { margin-top: 30px; text-align: center; font-size: 11.5px; line-height: 1.6; color: var(--muted); }
+footer a { color: var(--muted); }
