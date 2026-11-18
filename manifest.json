@@ -1,12 +1,13 @@
 {
   "name": "Song Link Converter",
   "short_name": "Song Link",
+  "description": "Paste a Spotify song link and get it on Apple Music, SoundCloud, Amazon Music and more.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#0d1117",
   "theme_color": "#0d1117",
   "icons": [
-    { "src": "icon.png", "sizes": "180x180", "type": "image/png" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+    { "src": "assets/icons/icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
