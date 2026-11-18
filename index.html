@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Song Link">
+<meta name="theme-color" content="#0d1117">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.json">
+<title>Song Link Converter</title>
+<style>
+  :root {
+    --bg: #0d1117; --panel: #161b22; --panel-2: #1c2330; --border: #2a3340;
+    --text: #e6edf3; --muted: #8b98a8; --accent: #1db954; --accent-dim: #17833d; --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 640px; margin: 0 auto; padding: 28px 18px 60px; }
+  header { text-align: center; margin-bottom: 22px; }
+  h1 { font-size: 22px; margin: 0 0 6px; }
+  .sub { color: var(--muted); font-size: 14px; margin: 0; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin: 22px 0 10px; font-weight: 700; }
+
+  .input-row { display: flex; gap: 8px; }
+  input[type="text"] { flex: 1; min-width: 0; background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); color: var(--text); padding: 14px; font-size: 16px; outline: none; }
+  input[type="text"]:focus { border-color: var(--accent); }
+  button.go { background: var(--accent); color: #04140a; border: none; border-radius: var(--radius);
+    padding: 0 20px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  button.go:disabled { opacity: .55; }
+  .paste { display: block; width: 100%; margin-top: 8px; background: var(--panel-2); border: 1px solid var(--border);
+    color: var(--text); border-radius: var(--radius); padding: 11px; font-size: 14px; font-weight: 600; cursor: pointer; }
+
+  .status { text-align: center; color: var(--muted); font-size: 14px; margin: 22px 0; }
+  .status.err { color: #ff7b72; }
+
+  .track { display: flex; align-items: center; gap: 14px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 14px; margin-top: 22px; }
+  .track img { width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0; background: var(--panel-2); }
+  .track .t { font-weight: 700; font-size: 16px; margin: 0 0 3px; overflow-wrap: anywhere; }
+  .track .a { color: var(--muted); font-size: 13px; margin: 0; }
+
+  .matches { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+  .match { flex: 0 0 118px; background: var(--panel); border: 2px solid var(--border); border-radius: 12px;
+    padding: 8px; cursor: pointer; text-align: left; color: var(--text); font: inherit; }
+  .match.sel { border-color: var(--accent); }
+  .match img { width: 100%; aspect-ratio: 1; border-radius: 8px; object-fit: cover; display: block; background: var(--panel-2); }
+  .match b { display: block; font-size: 12.5px; margin-top: 6px; line-height: 1.25; overflow-wrap: anywhere; }
+  .match small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; line-height: 1.25; overflow-wrap: anywhere; }
+  .note { color: var(--muted); font-size: 12.5px; margin: 6px 0 0; }
+
+  .plat { display: flex; align-items: center; gap: 12px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px; margin-bottom: 10px; }
+  .plat .ic { width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; display: grid; place-items: center;
+    font-size: 16px; font-weight: 800; color: #fff; }
+  .plat .name { flex: 1; min-width: 0; }
+  .plat .name b { display: block; font-size: 14.5px; }
+  .plat .name small { color: var(--muted); font-size: 11.5px; display: block; margin-top: 1px; }
+  .tag { display: inline-block; font-size: 10.5px; font-weight: 700; padding: 1px 6px; border-radius: 5px; margin-left: 6px; vertical-align: 1px; }
+  .tag.exact { background: rgba(29,185,84,.18); color: var(--accent); }
+  .tag.search { background: rgba(139,152,168,.18); color: var(--muted); }
+  .btns { display: flex; gap: 7px; flex-shrink: 0; }
+  .btns a, .btns button { border: 1px solid var(--border); background: var(--panel-2); color: var(--text); border-radius: 9px;
+    padding: 8px 12px; font-size: 13px; font-weight: 600; cursor: pointer; text-decoration: none; font-family: inherit; }
+  .btns button.done { background: var(--accent); color: #04140a; border-color: var(--accent); }
+  footer { text-align: center; color: var(--muted); font-size: 11.5px; margin-top: 30px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎵 Song Link Converter</h1>
+    <p class="sub">Paste a Spotify song link and get it on every other platform.</p>
+  </header>
+
+  <div class="input-row">
+    <input type="text" id="url" placeholder="https://open.spotify.com/track/..." autocomplete="off" spellcheck="false" />
+    <button class="go" id="go">Find</button>
+  </div>
+  <button class="paste" id="paste" type="button">📋 Paste from clipboard &amp; find</button>
+
+  <div id="status" class="status" style="display:none;"></div>
+  <div id="result"></div>
+
+  <footer>Song info from Spotify, matches from Apple Music search.<br>
+  "Exact" links go straight to the song. "Search" links open that app's search for it.</footer>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var urlInput = $('url'), goBtn = $('go'), statusEl = $('status'), resultEl = $('result');
+  var state = null;
+
+  function setStatus(msg, isErr) {
+    statusEl.style.display = msg ? 'block' : 'none';
+    statusEl.textContent = msg || '';
+    statusEl.className = 'status' + (isErr ? ' err' : '');
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function copyText(text, btn) {
+    var done = function () {
+      var old = btn.textContent; btn.textContent = 'Copied ✓'; btn.classList.add('done');
+      setTimeout(function () { btn.textContent = old; btn.classList.remove('done'); }, 1400);
+    };
+    var fallback = function () {
+      var ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+      document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); done(); } catch (e) {} document.body.removeChild(ta);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(done, fallback);
+    else fallback();
+  }
+  function norm(s) {
+    return String(s || '').toLowerCase().replace(/\(.*?\)|\[.*?\]/g, '').replace(/ - .*$/, '')
+      .replace(/[^a-z0-9]+/g, ' ').trim();
+  }
+  function cleanSpotifyUrl(raw) {
+    var m = raw.match(/open\.spotify\.com\/(?:intl-[a-z]+\/)?track\/([A-Za-z0-9]+)/);
+    return m ? { url: 'https://open.spotify.com/track/' + m[1], id: m[1] } : null;
+  }
+
+  var SEARCH_PLATFORMS = [
+    { label: 'SoundCloud',    bg: '#ff5500', url: function (q) { return 'https://soundcloud.com/search/sounds?q=' + encodeURIComponent(q); } },
+    { label: 'Amazon Music',  bg: '#17aaff', url: function (q) { return 'https://music.amazon.com/search/' + encodeURIComponent(q); } },
+    { label: 'YouTube Music', bg: '#ff0000', url: function (q) { return 'https://music.youtube.com/search?q=' + encodeURIComponent(q); } },
+    { label: 'YouTube',       bg: '#cc0000', url: function (q) { return 'https://www.youtube.com/results?search_query=' + encodeURIComponent(q); } },
+    { label: 'Tidal',         bg: '#000000', url: function (q) { return 'https://listen.tidal.com/search?q=' + encodeURIComponent(q); } },
+    { label: 'Deezer',        bg: '#a238ff', url: function (q) { return 'https://www.deezer.com/search/' + encodeURIComponent(q); } }
+  ];
+
+  function platRow(label, bg, url, exact, sub) {
+    var row = document.createElement('div');
+    row.className = 'plat';
+    row.innerHTML =
+      '<div class="ic" style="background:' + bg + '">' + esc(label.charAt(0)) + '</div>' +
+      '<div class="name"><b>' + esc(label) + '<span class="tag ' + (exact ? 'exact">Exact' : 'search">Search') + '</span></b>' +
+      (sub ? '<small>' + esc(sub) + '</small>' : '') + '</div>' +
+      '<div class="btns"><a href="' + esc(url) + '" target="_blank" rel="noopener">Open</a><button type="button">Copy</button></div>';
+    row.querySelector('button').addEventListener('click', function () { copyText(url, this); });
+    return row;
+  }
+
+  function render() {
+    var s = state, pick = s.matches[s.sel];
+    var artist = pick ? pick.artistName : '';
+    var q = (s.title + ' ' + artist).trim();
+    resultEl.innerHTML = '';
+
+    var tr = document.createElement('div');
+    tr.className = 'track';
+    tr.innerHTML = (s.thumb ? '<img src="' + esc(s.thumb) + '" alt="">' : '') +
+      '<div><p class="t">' + esc(s.title) + '</p><p class="a">' + esc(artist || 'Spotify') + '</p></div>';
+    resultEl.appendChild(tr);
+
+    if (s.matches.length > 1) {
+      var h = document.createElement('h2'); h.textContent = 'Which one is it? (match the cover)'; resultEl.appendChild(h);
+      var wrap = document.createElement('div'); wrap.className = 'matches';
+      s.matches.forEach(function (m, i) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'match' + (i === s.sel ? ' sel' : '');
+        b.innerHTML = '<img src="' + esc((m.artworkUrl100 || '').replace('100x100', '200x200')) + '" alt="">' +
+          '<b>' + esc(m.trackName) + '</b><small>' + esc(m.artistName) + '</small>';
+        b.addEventListener('click', function () { s.sel = i; render(); });
+        wrap.appendChild(b);
+      });
+      resultEl.appendChild(wrap);
+    }
+
+    var h2 = document.createElement('h2'); h2.textContent = 'Links'; resultEl.appendChild(h2);
+    if (pick) {
+      resultEl.appendChild(platRow('Apple Music', '#fa2d48', pick.trackViewUrl.replace(/[?&]uo=\d+/, ''), true, pick.collectionName));
+    } else {
+      resultEl.appendChild(platRow('Apple Music', '#fa2d48', 'https://music.apple.com/us/search?term=' + encodeURIComponent(q), false));
+      var n = document.createElement('p'); n.className = 'note'; n.textContent = 'No exact Apple Music match found, so this is a search link.';
+      resultEl.appendChild(n);
+    }
+    SEARCH_PLATFORMS.forEach(function (p) { resultEl.appendChild(platRow(p.label, p.bg, p.url(q), false, q)); });
+    resultEl.appendChild(platRow('song.link (all platforms)', '#1db954', 'https://song.link/s/' + s.id, true, 'Exact matches for every service'));
+  }
+
+  function lookup() {
+    var raw = urlInput.value.trim();
+    if (!raw) { setStatus('Paste a Spotify song link first.', true); return; }
+    var sp = cleanSpotifyUrl(raw);
+    if (!sp) { setStatus('That isn’t a Spotify song link. It should look like open.spotify.com/track/…', true); return; }
+
+    resultEl.innerHTML = ''; setStatus('Finding matches…'); goBtn.disabled = true;
+
+    fetch('https://open.spotify.com/oembed?url=' + encodeURIComponent(sp.url))
+      .then(function (r) { if (!r.ok) throw new Error('Spotify couldn’t find that song. Check the link.'); return r.json(); })
+      .then(function (o) {
+        state = { id: sp.id, title: o.title, thumb: o.thumbnail_url, matches: [], sel: 0 };
+        return fetch('https://itunes.apple.com/search?entity=song&country=us&limit=10&term=' + encodeURIComponent(o.title))
+          .then(function (r) { return r.ok ? r.json() : { results: [] }; })
+          .catch(function () { return { results: [] }; });
+      })
+      .then(function (j) {
+        var t = norm(state.title);
+        var res = (j.results || []).filter(function (x) { return x.trackViewUrl; });
+        var exact = res.filter(function (x) { return norm(x.trackName) === t; });
+        state.matches = (exact.length ? exact : res).slice(0, 8);
+        render(); setStatus('');
+      })
+      .catch(function () {
+        // Lookups blocked (e.g. sandboxed host): still give the exact all-platform link.
+        resultEl.innerHTML = '';
+        var h = document.createElement('h2'); h.textContent = 'Your link'; resultEl.appendChild(h);
+        resultEl.appendChild(platRow('song.link (all platforms)', '#1db954', 'https://song.link/s/' + sp.id, true, 'Opens a page with Apple Music, Amazon, SoundCloud & more'));
+        var n = document.createElement('p'); n.className = 'note';
+        n.textContent = 'Couldn’t look up the song details here, but this link shows exact matches on every service.';
+        resultEl.appendChild(n);
+        setStatus('');
+      })
+      .then(function () { goBtn.disabled = false; });
+  }
+
+  goBtn.addEventListener('click', lookup);
+  urlInput.addEventListener('keydown', function (e) { if (e.key === 'Enter') lookup(); });
+  urlInput.addEventListener('paste', function () { setTimeout(lookup, 50); });
+  $('paste').addEventListener('click', function () {
+    if (!navigator.clipboard || !navigator.clipboard.readText) { urlInput.focus(); setStatus('Long-press the box and tap Paste.', false); return; }
+    navigator.clipboard.readText().then(function (t) { urlInput.value = t.trim(); lookup(); },
+      function () { urlInput.focus(); setStatus('Long-press the box and tap Paste.', false); });
+  });
+})();
+</script>
+</body>
+</html>
